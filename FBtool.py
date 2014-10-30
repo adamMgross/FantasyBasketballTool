@@ -1,8 +1,5 @@
 #TODO: in no particular order
-# 1) organize
-# 1b) fix tie category problem
-# 1c) account for mistakes in user input
-# 1d) account for percentages in stat runs
+# 1) account for mistakes in user input
 # 2) Incorporate API use to make it so user only has to input name of player, and stats are pulled from online
 # 3) Create team structure where positions are filled accordingly
 # 4) Create structure for points system, no opponent
