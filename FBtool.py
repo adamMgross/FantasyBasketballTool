@@ -1,8 +1,7 @@
 #TODO: in no particular order
-# 1) account for mistakes in user input
-# 2) Incorporate API use to make it so user only has to input name of player, and stats are pulled from online
-# 3) Create team structure where positions are filled accordingly
-# 4) Create structure for points system, no opponent
+# 1) Incorporate API use to make it so user only has to input name of player, and stats are pulled from online
+# 2) Create structure for points system, no opponent
+# 3) Incorporate API to make games per week update automatically
 
 from playerObj import Player
 from Team import Team
@@ -37,12 +36,20 @@ def get_score(my_team, opponent):
 
     count = {'wins': 0, 'losses': 0, 'ties': 0}
     for key in my_team.stats:
-        if my_team.stats[key] > opponent.stats[key]:
-            count['wins'] += 1
-        elif my_team.stats[key] == opponent.stats[key]:
-            count['ties'] += 1
+        if key is 'TO':
+            if my_team.stats[key] > opponent.stats[key]:
+                count['losses'] += 1
+            elif my_team.stats[key] == opponent.stats[key]:
+                count['ties'] += 1
+            else:
+                count['wins'] += 1
         else:
-            count['losses'] += 1
+            if my_team.stats[key] > opponent.stats[key]:
+                count['wins'] += 1
+            elif my_team.stats[key] == opponent.stats[key]:
+                count['ties'] += 1
+            else:
+                count['losses'] += 1
 
     return count
 
@@ -79,7 +86,7 @@ def play_week(my_team, opponent):
     print ''
 
     for key in my_team.stats:
-        print str(key) + ': ' + str(run_totals(my_team, opponent, key)) + ' ' + find_difference(my_team, opponent, key)
+        print str(key) + ':\t ' + str(run_totals(my_team, opponent, key)) + '\t ' + find_difference(my_team, opponent, key)
 
     print '\nResult: '
 
