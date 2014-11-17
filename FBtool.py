@@ -8,7 +8,7 @@ from playerObj import Player
 from Team import Team
 import json
 num_of_statistical_categories = 13
-players_on_team = 1
+players_on_team = 13
 
 #simulation functions-------------------------------------------------------------------------------------------------
 
@@ -29,8 +29,8 @@ def find_difference(my_team, opponent, category):
 
     if dif >= 0:
         sign = '+'
-
-    return sign + str(dif)
+    
+    return sign + str(round(dif,3))
 
 #determines the final score between my_team and opponent
 def get_score(my_team, opponent):
@@ -71,7 +71,7 @@ def run_totals(my_team, opponent, key):
     my_team.totals[key] = my_total
     opponent.totals[key] = opponent_total
 
-    return my_total
+    return round(my_total,3)
 
 #simulates a week's worth of play for @param my_team and @param opponent
 #and prints out the results to the screen
@@ -90,13 +90,15 @@ def play_week(my_team, opponent):
 #modifiers-------------------------------------------------------------------------------------------------------------
 
 def set_averages_by_array(player, array):
-    array = array.split(',')
-
-    player.set_average('FGM', float(array[0]))
+    array = array.split('\t')
+    fgs = float(array[0][:array[0].index('/')])
+    fts = float(array[2][:array[2].index('/')])
+    tps = float (array[4][:array[4].index('/')])
+    player.set_average('FGM', fgs)
     player.set_average('FG%', float(array[1]))
-    player.set_average('FTM', float(array[2]))
+    player.set_average('FTM', fts)
     player.set_average('FT%', float(array[3]))
-    player.set_average('3PM', float(array[4]))
+    player.set_average('3PM', tps)
     player.set_average('TP%', float(array[5]))
     player.set_average('REB', float(array[6]))
     player.set_average('AST', float(array[7]))
@@ -109,22 +111,39 @@ def set_averages_by_array(player, array):
 
 #input handlers--------------------------------------------------------------------------------------------------------
 
+def take_str_input(str):
+    answer = raw_input(str)
+    words = answer.split(' ')
+    toReturn = ''
+    for word in words:
+        if word.isalpha() is False:
+            return take_str_input('Invalid input. \n' + str)
+        else:
+            toReturn += word + ' '
+    return toReturn[:-1]    
+
+def take_num_input(str):
+    answer = raw_input(str)
+    if not answer.isalpha():
+        return answer
+    take_num_input('Invalid input. \n' + str)
+
+
 #prompts the user to input data for @param key category
 def input_data(category_name):
-    num = float(raw_input('Input ' + category_name + ' avg: '))
+    num = float(take_num_input('Input ' + category_name + ' avg: '))
     answer = ''
     if num > 39:
-        answer = raw_input('Are you sure that was the right number? (y|n) ')
+        answer = take_str_input('Are you sure that was the right number? (y|n) ')
         if answer == 'n':
-            num = float(raw_input('Input ' + category_name + ' avg: '))
+            num = float(take_num_input('Input ' + category_name + ' avg: '))
     return num
 
 #prompts the user to input data for all member variables in @param player
 def player_query(player):
-    player.set_name(raw_input('Input player name: '))
-    player.set_position(raw_input('Input player position: '))
-    player.set_num_of_games(int(raw_input('Input how many games he will play this week: ')))
-    set_averages_by_array(player, raw_input('Input averages in the following order separated by commas and with no spaces: FGM, FG%, FTM, FT%, 3PM, TP%, REB, AST, STL, BLK, TO, DD, PTS: '))
+    player.set_name(take_str_input('Input player name: '))
+    player.set_num_of_games(float(take_num_input('Input how many games he will play this week: ')))
+    set_averages_by_array(player, take_num_input('Input averages in the following order separated by commas and with no spaces: FGM, FG%, FTM, FT%, 3PM, TP%, REB, AST, STL, BLK, TO, DD, PTS: '))
 
 #prompts the user to input each player in a team along with their individual stats
 #@return team_arr, an array of all of the players that were input
@@ -146,7 +165,7 @@ def make_changes(my_team):
     substitute = 'y'
     while substitute == 'y':
         player_new = Player()
-        to_remove = raw_input('Whom do you want to remove? ')
+        to_remove = take_str_input('Whom do you want to remove? ')
         found = False
         while (not found):
             for i, player in enumerate(my_team.team):
@@ -156,28 +175,29 @@ def make_changes(my_team):
                     player_query(my_team.team[i])
                     found = True
             if not found:
-                to_remove = raw_input('Couldnt find him, try different spelling or pick a different player: ')
+                to_remove = take_str_input('Couldnt find him, try different spelling or pick a different player: ')
 
         my_team.set_total_avgs()
-        substitute = raw_input('Do you want to sub in another player? (y|n) ')
+        substitute = take_str_input('Do you want to sub in another player? (y|n) ')
 
 def edit_player(player):
-    answer = raw_input('Type name of category to edit, "games" to change # of games, or "all" to change all ')
+    answer = take_str_input('Type name of category to edit, "games" to change # of games, or "all" to change all ')
 
     if answer == 'all':
-        player.set_num_of_games(int(raw_input('Input how many games he will play this week: ')))
-        set_averages_by_array(player, raw_input('Input averages in the following order separated by commas and with no spaces: FG%, FT%, 3PM, REB, AST, STL, BLK, DD, PTS: '))
+        player.set_name((take_str_input('Input player name: ')))
+        player.set_num_of_games(float(take_num_input('Input how many games he will play this week: ')))
+        set_averages_by_array(player, take_num_input('Input averages in the following order separated by commas and with no spaces: FGM, FG%, FTM, FT%, 3PM, TP%, REB, AST, STL, BLK, TO, DD, PTS: '))
 
     elif answer == 'games':
-        player.num_of_games = raw_input('Input number of games: ')
+        player.num_of_games = float(take_num_input('Input number of games: '))
 
     else:
-        player.set_average(answer, float(raw_input('Input ' + answer + ' avg: ')))
+        player.set_average(answer, float(take_num_input('Input ' + answer + ' avg: ')))
 
 
 def update_players(my_team):
 
-        to_edit = raw_input('Whom do you want to edit? ')
+        to_edit = take_str_input('Whom do you want to edit? ')
         found = False
         while (not found):
             for i, player in enumerate(my_team.team):
@@ -185,7 +205,7 @@ def update_players(my_team):
                     edit_player(player)
                     found = True
             if not found:
-                to_edit = raw_input('Couldnt find him, try different spelling or pick a different player: ')
+                to_edit = take_str_input('Couldnt find him, try different spelling or pick a different player: ')
 
         my_team.set_total_avgs()
         dump_to_json(my_team, True)
@@ -195,10 +215,9 @@ def decode(player_array_of_dicts):
     team = []
     for dct in player_array_of_dicts:
         player = Player()
-        player.set_num_of_games(dct['num_of_games'])
+        player.set_num_of_games(float(dct['num_of_games']))
         player.set_name(dct['name'])
         player.set_stats(dct['stats'])
-        player.set_position(dct['position'])
         team.append(player)
     return team
 
@@ -234,7 +253,7 @@ def load_from_json(is_users_team):
 def run_main():
     team1 = Team([])
     team2 = Team([])
-    answer = raw_input('Do you want to load your team, edit your team or create a new one or stop? (answer: load or edit or new or stop) ')
+    answer = take_str_input('Do you want to load your team, edit your team or create a new one or stop? (answer: load or edit or new or stop) ')
 
     if answer == 'stop':
         print '\nDone.\n'
@@ -242,7 +261,7 @@ def run_main():
 
     while answer == 'edit':
         update_players(load_from_json(True))
-        answer = raw_input('Type "edit" to make another edit, "load" to load your team, or "new" to make a new team. ')
+        answer = take_str_input('Type "edit" to make another edit, "load" to load your team, or "new" to make a new team. ')
 
     if answer == 'new':
         print 'Team 1: '
@@ -251,7 +270,7 @@ def run_main():
     else:
         team1 = load_from_json(True)
 
-    answer = raw_input('Do you want to load your opponents team or create a new one? (answer: load or new) ')
+    answer = take_str_input('Do you want to load your opponents team or create a new one? (answer: load or new) ')
 
     if answer == 'new':
         print 'Team 2: '
@@ -261,7 +280,7 @@ def run_main():
         team2 = load_from_json(False)
 
     simulate(team1, team2)
-    substitute = raw_input('Do you want to substitute in a new player for an active one (to test the difference)? (y|n) ')
+    substitute = take_str_input('Do you want to substitute in a new player for an active one (to test the difference)? (y|n) ')
     if substitute == 'y':
         make_changes(team1)
         simulate(team1, team2)

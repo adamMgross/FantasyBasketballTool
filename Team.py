@@ -42,8 +42,10 @@ class Team(object):
 
     #prints out the team, player by player
     def print_team_by_individual(self):
+        toReturn = ''
         for player in self.team:
-            player.print_player()
+            toReturn += player.name + '. '
+        print toReturn
 
     #resets team's totals to 0 in each category
     def reset_totals(self):
